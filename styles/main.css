@@ -1,0 +1,78 @@
+body {
+    font-family: monospace;
+    background-color: lime;
+    padding: 0px;
+    margin: 0;
+}
+
+#screen {
+    width: 100vw;
+    height: 100vh;
+    background-color: blue;
+}
+
+.taskbar {
+    position: fixed;
+    bottom: 0px;
+    left: 0px;
+    z-index: 800;
+    width: 100vw;
+    height: 7vh;
+    padding-bottom: 5px;
+    padding-top: 5px;
+    background-color: rgb(39, 39, 39);
+    overflow: hidden;
+    align-items: center;
+    text-align: center;
+}
+
+.taskbar .taskbar-item {
+    border-radius: 50%;
+}
+
+.menu-entry img {
+    width: auto;
+    height: 10vh;
+}
+
+.menu-entry {
+    height: 10vh;
+}
+
+.menu-entry span {
+    margin-left: 1vh;
+}
+
+.menu {
+    z-index: 700;
+    position: fixed;
+    bottom: 7.5vh;
+    left: 0px;
+    height: 50vh;
+    width: 50vw;
+    background-color: rgb(30, 30, 30);
+    color: white;
+    text-align: left;
+    overflow-y: scroll;
+}
+
+.window {
+    resize: both;
+    overflow: hidden;
+}
+
+.window .window-bar {
+    width: 100%;
+    background-color: grey;
+    color: white;
+    cursor: grab;
+    display: grid;
+    grid-template-columns: 9fr 1fr;
+}
+
+.close-btn {
+    color: white;
+    background-color: red;
+    border: none;
+    overflow: hidden;
+}

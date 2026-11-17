@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Icons</title>
+    <style>
+        body { font-family: arial; color: balck; background-color: white; }
+        canvas { border: 1px solid black; width: 500px; height: 500px; image-rendering: crisp-edges; }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    <input id="input" type="name" placeholder="file name">
+    <input id="w" type="number" placeholder="canvas width">
+    <input id="h" type="number" placeholder="canvas height">
+    <script>
+        const input = document.getElementById('input');
+        const w = document.getElementById('w');
+        const h = document.getElementById('h');
+        const canvas = document.getElementById('canvas');
+        /** @type {CanvasRenderingContext2D} */
+        const ctx = canvas.getContext('2d');
+
+        [w.value,h.value] = [200,200];
+        [canvas.width,canvas.height] = [w.value,h.value];
+
+        const c = {
+            w() {
+                return canvas.width;
+            },
+            h() {
+                return canvas.height;
+            }
+        };
+
+        [w,h].forEach(i => {
+            i.oninput = () => {
+                canvas.width = Number(w.value);
+                canvas.height = Number(h.value);
+            }
+        })
+
+        function download() {
+            let url = canvas.toDataURL();
+            const a = document.body.appendChild(document.createElement('a'));
+            a.href = url;
+            a.download = input.value;
+            a.click();
+            a.remove();
+        }
+    </script>
+</body>
+</html>

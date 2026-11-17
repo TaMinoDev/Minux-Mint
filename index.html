@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minux Mint</title>
+    <link rel="stylesheet" href="styles/main.css">
+</head>
+<body>
+    <div id="screen"></div>
+    <div class="taskbar"></div>
+    <script>
+        const screen = document.getElementById('screen');
+        const taskbar = document.getElementsByClassName('taskbar')[0];
+
+        const running = {};
+
+        const taskbarContent = {
+            "main": {
+                icon: './icons/nativ/minux.png',
+                dis: 'Open the main menu to start other programs',
+                action() {
+                    openMenu();
+                }
+            }
+        }
+
+        const programs = {
+            "Software Manager": {
+                icon: './icons/nativ/minux_install.png',
+                script: './scripts/nativ/minux_install.js',
+                action() {
+                    const name = Object.keys(programs).find(key => programs[key]["action"] === this.action);
+                    openWindow('Software Manager',250,250,`${name}`);
+                    console.log('Open window Software Manager');
+                }
+            }, "Minux Welcome": {
+                icon: './icons/nativ/minux_welcome.png',
+                script: './scripts/nativ/minux_welcome.js',
+                action() {
+                    const name = Object.keys(programs).find(key => programs[key]["action"] === this.action);
+                    openWindow('Welcome to Minux Mint',250,250,`${name}`);
+                    console.log('Open window Minux Mint');
+                }
+            }, "Dori": {
+                icon: './icons/nativ/dori.png',
+                script: './scripts/nativ/dori.js',
+                action() {
+                    const name = Object.keys(programs).find(key => programs[key]["action"] === this.action);
+                    openWindow('Filemanager - Dori',250,250,`${name}`);
+                    console.log('Open window File Manager Dori');
+                }
+            }, "Settings": {
+                icon: './icons/nativ/minux_settings.png',
+                script: './scripts/nativ/settings.js',
+                action() {
+                    const name = Object.keys(programs).find(key => programs[key]["action"] === this.action);
+                    openWindow('Settings',250,250,`${name}`);
+                    console.log('Open window Settings');
+                }
+            }, "Milli": {
+                icon: './icons/nativ/milli.png',
+                script: './scripts/nativ/text_editor.js',
+                action() {
+                    const name = Object.keys(programs).find(key => programs[key]["action"] === this.action);
+                    openWindow('Milli',500,500,`${name}`);
+                }
+            }
+        }
+
+        const directory = {
+            "*": {
+                "home": {
+                    "minux": {
+                        "desktop": {
+                            "install Minux": {
+                                type: 'exe',
+                                action() {
+                                    installMinux();
+                                }
+                            }
+                        },
+                        ".config": {
+                            "style.config": '{"bg": "./pictures/background/pic2.jpg"}',
+                        }
+                    }
+                }
+            }
+        }
+
+        async function openWindow(windowTitle = 'new window',width = 250,height = 250,src) {
+            if(document.getElementById('menu')) {
+                openMenu();
+            }
+            console.log(src);
+            const content = programs[src].content;
+            const win = document.createElement('div');
+            win.className = 'window';
+            win.innerHTML = `<div class="window-bar">${windowTitle}<button onclick="this.parentElement.parentElement.remove()" class="close-btn">x</button></div>`;
+            win.innerHTML += content;
+            win.style = `position: fixed; top: 50vh; left: 50vw; background-color: white; padding: 1px solid black;`;
+            document.body.appendChild(win);
+            programs[src].onOpen?.(win);
+            console.log(content);
+            console.log('window succesfully opened');
+            
+            const drag = win.querySelector('.window-bar');
+            let isDragging = false;
+            let offsetX, offsetY;
+            drag.onmousedown = (e) => {
+                isDragging = true;
+                
+                drag.style.userSelect = 'none';
+
+                offsetX = e.clientX - drag.parentElement.offsetLeft;
+                offsetY = e.clientY - drag.parentElement.offsetTop;
+                
+                drag.parentElement.style.zIndex += 2;
+                drag.style.cursor = 'grabbing';
+                drag.style.zIndex += 2;
+            };
+            document.addEventListener('mousemove',(e) => {
+                if (!isDragging) return;
+
+                let x = e.clientX - offsetX;
+                let y = e.clientY - offsetY;
+
+                drag.parentElement.style.left = `${x}px`;
+                drag.parentElement.style.top = `${y}px`;
+            });
+
+            document.addEventListener('mouseup',() => {
+                if (isDragging) {
+                    isDragging = false;
+                    drag.style.zIndex--;
+                    drag.parentElement.style.zIndex--;
+                    drag.style.userSelect = '';
+                    drag.style.cursor = 'grab';
+                }
+            });
+        }
+
+        function startTaskbar() {
+            running["minux-taskbar-starter"] = {
+                started: new Date(),
+                by: 'root'
+            }
+            for(t in taskbarContent) {
+                const item = document.createElement('img');
+                item.src = taskbarContent[t].icon;
+                item.style = 'width: auto; height: 7vh;';
+                item.className = 'taskbar-item';
+                item.title = taskbarContent[t].dis;
+                item.onclick = () => taskbarContent[t].action();
+                taskbar.appendChild(item);
+            }
+            delete running?.["minux-taskbar-starter"];
+        }
+
+        function loadBackground() {
+            let path = JSON.parse(directory["*"]["home"]["minux"][".config"]["style.config"])["bg"];
+            console.log(path);
+            screen.style.backgroundImage = `url('${path}')`;
+            screen.style.backgroundSize = 'cover';
+        }
+
+        function openMenu() {
+            if(!document.getElementById('menu')) {
+                const menu = document.createElement('div');
+                menu.id = 'menu';
+                menu.className = 'menu';
+                document.body.appendChild(menu);
+                for(program in programs) {
+                    const entry = document.createElement('div');
+                    entry.innerHTML = `<img src="${programs[program].icon}" onclick="programs['${program}'].action()"><span>${program}</span>`;
+                    entry.className = 'menu-entry';
+                    menu.appendChild(entry);
+                    menu.appendChild(document.createElement('hr'));
+                }
+            } else {
+                document.getElementById('menu').remove();
+            }
+        }
+
+        window.onload = () => {
+            for(p in programs) {
+                const block = document.createElement('script');
+                block.src = programs[p].script;
+                document.body.append(block);
+                console.log('script loaded - ' + programs[p].script);
+                console.log(p);
+            }
+            startTaskbar();
+            loadBackground();
+            if (!document.getElementById('blackscreen')) {
+                const blackscreen = document.createElement('div');
+                blackscreen.style = 'position: fixed; top: 0px; left: 0px; width: 100vw; height: 100vh; z-index: 999999; background-color: black; display: flex; justify-content: center; align-items: center;';
+                blackscreen.innerHTML = `<svg version="1.0" xmlns="http://www.w3.org/2000/svg"
+                    width="200.000000pt" height="200.000000pt" viewBox="0 0 200.000000 200.000000"
+                    preserveAspectRatio="xMidYMid meet">
+
+                    <g transform="translate(0.000000,200.000000) scale(0.100000,-0.100000)"
+                    fill="#ffffff" stroke="none">
+                    <path d="M815 1876 c-328 -77 -566 -295 -671 -616 -27 -80 -28 -95 -28 -260 0
+                    -165 1 -180 28 -260 96 -294 302 -500 596 -596 80 -27 95 -28 260 -28 165 0
+                    180 1 260 28 294 96 500 302 596 596 27 80 28 95 28 260 0 165 -1 180 -28 260
+                    -97 294 -305 502 -596 596 -74 23 -105 27 -235 30 -104 3 -168 -1 -210 -10z
+                    m-87 -653 c-2 -20 -9 -29 -25 -31 -20 -3 -23 1 -23 27 0 27 4 31 26 31 22 0
+                    25 -4 22 -27z m-364 -78 c29 -86 39 -95 50 -50 4 14 16 50 27 80 19 52 22 55
+                    55 55 l34 0 0 -180 0 -180 -25 0 -25 0 -1 153 -1 152 -30 -88 c-26 -75 -33
+                    -88 -50 -85 -16 2 -28 24 -52 88 l-31 85 -3 -152 c-2 -145 -4 -153 -22 -153
+                    -19 0 -20 7 -20 180 l0 180 33 0 c32 0 33 -2 61 -85z m728 -46 c14 -25 18 -59
+                    18 -131 0 -98 0 -98 -25 -98 -25 0 -25 0 -25 96 0 115 -8 134 -56 134 -31 0
+                    -37 -4 -50 -35 -8 -20 -14 -67 -14 -115 0 -73 -2 -80 -20 -80 -19 0 -20 7 -20
+                    135 0 128 1 135 20 135 12 0 20 -7 20 -16 0 -13 3 -14 14 -5 47 39 114 30 138
+                    -20z m-362 -74 l0 -115 40 0 c33 0 40 -3 40 -20 0 -19 -7 -20 -110 -20 -103 0
+                    -110 1 -110 20 0 17 7 20 45 20 l45 0 0 95 0 95 -35 0 c-28 0 -35 4 -35 20 0
+                    18 7 20 60 20 l60 0 0 -115z m511 28 c1 -123 7 -137 51 -141 55 -5 68 21 68
+                    135 0 93 0 93 25 93 l25 0 0 -135 0 -135 -25 0 c-15 0 -25 6 -25 14 0 11 -7
+                    10 -35 -4 -27 -14 -44 -16 -67 -10 -51 15 -57 33 -58 158 0 105 1 112 20 112
+                    18 0 20 -7 21 -87z m321 42 c18 -24 36 -44 40 -45 4 0 21 20 39 45 23 32 39
+                    45 56 45 28 0 27 -1 -30 -78 l-40 -52 45 -58 c63 -80 63 -82 34 -82 -18 0 -34
+                    13 -61 50 -20 28 -40 50 -43 50 -4 0 -23 -23 -42 -50 -28 -39 -41 -50 -63 -50
+                    l-29 0 51 64 c28 35 51 69 51 76 0 6 -21 38 -46 71 -44 58 -45 59 -20 59 18 0
+                    34 -12 58 -45z"/>
+                    </g>
+                    </svg>`;
+                document.body.appendChild(blackscreen);
+                //setTimeout(() => {
+                    blackscreen.remove();
+                //},2000)
+            }
+        }
+
+
+        function getValueByPath(obj, pathString) {
+        const keys = pathString.match(/[^[\]'"]+/g);
+        
+        if (!keys) return undefined;
+        return keys.reduce((current, key) => current?.[key], obj);
+        }
+
+        screen.onclick = () => {
+            if(document.getElementById('menu')) {
+                openMenu();
+            }
+        }
+    </script>
+</body>
+</html>

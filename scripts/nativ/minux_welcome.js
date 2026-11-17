@@ -1,0 +1,1 @@
+programs["Minux Welcome"].content = '<h1>Welcome</h1><hr><h3>You\'r now using Minux Mint WOS<br><small>WebOperatingSystem</small></h3>';
